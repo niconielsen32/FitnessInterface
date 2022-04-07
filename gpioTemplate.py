@@ -7,7 +7,8 @@ import time
 PIN_CLK = 11
 PIN_MOSI = 10
 PIN_MISO = 9
-PIN_CS = 8
+PIN_CE0 = 8
+PIN_CE1 = 7
 
 
 #global variables
@@ -22,7 +23,8 @@ def init_GPIO():
     GPIO.setup(PIN_CLK, GPIO.OUT)
     GPIO.setup(PIN_MISO, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(PIN_MOSI, GPIO.OUT)
-    GPIO.setup(PIN_CS, GPIO.OUT)
+    GPIO.setup(PIN_CE0, GPIO.OUT)
+    GPIO.setup(PIN_CE1, GPIO.OUT)
 
 
    
