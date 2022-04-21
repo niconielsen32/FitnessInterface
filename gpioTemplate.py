@@ -49,7 +49,7 @@ def recvBits(numBits, clkPin, misoPin):
     return (retVal/2)
 
 
-def readAdc(csPin, clkPin, misoPin, mosiPin, csPin):
+def readAdc(csPin, clkPin, misoPin, mosiPin):
         
     # Datasheet says chip select must be pulled high between conversions
     GPIO.output(csPin, GPIO.HIGH)
@@ -76,10 +76,10 @@ try:
     while True:
         
         # Channel 0
-        potentiometer_value = readAdc(0, PIN_CLK, PIN_MISO, PIN_MOSI, PIN_CS)
+        potentiometer_value = readAdc(PIN_CE0, PIN_CLK, PIN_MISO, PIN_MOSI)
         # Channel 1 - might need to just change the pins on raspberry to get the 2 channels instead.
         # GPIO 7 and 8 and then SPI setup pins - Outputs on 7 and 8
-        pressure_value = readAdc(0, PIN_CLK, PIN_MISO, PIN_MOSI, PIN_CS)
+        pressure_value = readAdc(PIN_CE1, PIN_CLK, PIN_MISO, PIN_MOSI)
         
         print("Poten: ", potentiometer_value)
         print("Pressure: ", pressure_value)
