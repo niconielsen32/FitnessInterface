@@ -1,108 +1,103 @@
-#!/usr/bin/env python
-import RPi.GPIO as GPIO
+# A python library to use the ADC0832 analog to digital converter with a Raspberry Pi
+# Copyright (C) 2016  Sahithyen Kanaganayagam
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import time
+import RPi.GPIO as GPIO
+import atexit
 
-ADC_CS  = 11
-ADC_CLK = 12 #error, the pin was 13 now corrected to 12 to be consistent with lesson circuit diagram.
-ADC_DIO = 13 #error, was 12, now pin 13, to be consistent with lesson circuit diagram.
+class ADC0832(object):
+    """Functionality to use the analog to digital converter """
 
-def setup():
-	GPIO.setwarnings(False)
-	GPIO.setmode(GPIO.BOARD)    #Number GPIOs by its physical location
-	GPIO.setup(ADC_CS, GPIO.OUT)
-	GPIO.setup(ADC_CLK, GPIO.OUT)
+    def __init__(self):
+        # Initialize pin numbers
+        self.csPin = 17
+        self.clkPin = 27
+        self.doPin = 23
+        self.diPin = 24
 
-def destroy():
-	GPIO.cleanup()
+        # Setup GPIO
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.csPin, GPIO.OUT, initial=GPIO.HIGH)
+        GPIO.setup(self.clkPin, GPIO.OUT, initial=GPIO.LOW)
 
-def getResult(channel):     # get ADC result
-	GPIO.setup(ADC_DIO, GPIO.OUT)
-	GPIO.output(ADC_CLK, 0)
-	#time.sleep(0.000002)
-	#pull cs low to select chip for input.
-	GPIO.output(ADC_CS, 0)
-	#send the start bit
-	GPIO.output(ADC_DIO, 1)
-	GPIO.output(ADC_CLK, 1)
-	#time.sleep(0.000002)
-	GPIO.output(ADC_CLK, 0)
-	#time.sleep(0.000002)
+        # Set a cleanup function
+        atexit.register(self.cleanup)
 
-	#send SGL / DIF = 1 = Single ended
-	GPIO.output(ADC_DIO, 1)
-	#time.sleep(0.000002)
-	GPIO.output(ADC_CLK, 1)
-	#time.sleep(0.000002)
-	GPIO.output(ADC_CLK, 0)
-	#time.sleep(0.000002)
-	
-	#send the bit to signal which channel 
-	#channel 0 
-	if channel == 0:
-		GPIO.output(ADC_DIO, 0)
-		#time.sleep(0.000002)
-		GPIO.output(ADC_CLK, 1)
-		#time.sleep(0.000002)
-	#channel 1 
-	elif channel == 1:
-		GPIO.output(ADC_DIO, 1)
-		#time.sleep(0.000002)
-		GPIO.output(ADC_CLK, 1)
-		#time.sleep(0.000002)
-	
-	GPIO.output(ADC_CLK, 0)
-	#time.sleep(0.000002)
+    def _getValue(self, sglDif, oddSign):
+        timingSecurityOffset = 1.05
 
-	#read input off pin
-	GPIO.setup(ADC_DIO, GPIO.IN)
+        dataMSBFirst = 0
+        dataLSBFirst = 0
 
-	
-	GPIO.output(ADC_CLK, 1)
-	#time.sleep(0.000002)
-		
-	dat1 = 0
-	for i in range(8):
-		GPIO.output(ADC_CLK, 1)
-		#time.sleep(0.000002)
-		GPIO.output(ADC_CLK, 0)
-		dat1 <<= 1	
-		if (GPIO.input(ADC_DIO)):		
-			dat1 |= 0x1 #GPIO.input(ADC_DIO)
-		#time.sleep(0.000002)	
-		#time.sleep(0.000002)
+        ## Select chip
+        GPIO.output(self.csPin, GPIO.LOW)
 
-		
-		
-	#dat2 = 0
-	#for i in range(0, 8):
-	#	dat2 << 1
-	#	dat2 = dat2 | GPIO.input(ADC_DIO) #<< i
-	#	GPIO.output(ADC_CLK, 1)
-	#	time.sleep(0.000002)
-	#	GPIO.output(ADC_CLK, 0)
-	 #	time.sleep(0.000002)
-	
-	GPIO.output(ADC_CS, 1)
-	GPIO.setup(ADC_DIO, GPIO.OUT)
-	return dat1
-	#return res
-	#if dat1 == dat2:
-	#	return dat1
-	#else:
-	#	return 0
+        ## Request data
+        GPIO.setup(self.diPin, GPIO.OUT)
 
-def loop():
-	while True:
-		res = getResult(0)
-		print("x: " + str(res))
-		res = getResult(1)
-		print("y: " + str(res))
-		#print 'res = %d' % res
-		time.sleep(0.4)
+        # Start bit
+        GPIO.output(self.diPin, GPIO.HIGH)
+        time.sleep(0.00025 * timingSecurityOffset)
+        GPIO.output(self.clkPin, GPIO.HIGH)
+        time.sleep(0.00009 * timingSecurityOffset)
+        GPIO.output(self.clkPin, GPIO.LOW)
 
-if __name__ == '__main__':
-	setup()
-	try:
-		loop()
-	except KeyboardInterrupt:
-		destroy()
+        # SGL / DIF bit
+        GPIO.output(self.diPin, sglDif)
+        time.sleep(0.00025 * timingSecurityOffset)
+        GPIO.output(self.clkPin, GPIO.HIGH)
+        time.sleep(0.00009 * timingSecurityOffset)
+        GPIO.output(self.clkPin, GPIO.LOW)
+
+        # ODD / SIGN bit
+        GPIO.output(self.diPin, oddSign)
+        time.sleep(0.00025 * timingSecurityOffset)
+        GPIO.output(self.clkPin, GPIO.HIGH)
+        time.sleep(0.00009 * timingSecurityOffset)
+        GPIO.output(self.clkPin, GPIO.LOW)
+
+        ## Read data
+        GPIO.setup(self.doPin, GPIO.IN)
+
+        # Read MSB Data
+        for i in range(8):
+            GPIO.output(self.clkPin, GPIO.HIGH)
+            time.sleep(0.00009 * timingSecurityOffset)
+            GPIO.output(self.clkPin, GPIO.LOW)
+            time.sleep(0.0015 * timingSecurityOffset)
+            dataMSBFirst = (dataMSBFirst << 1) | GPIO.input(self.doPin)
+
+        # Read LSB Data
+        for i in range(8):
+            dataLSBFirst = dataLSBFirst | (GPIO.input(self.doPin) << i)
+            GPIO.output(self.clkPin, GPIO.HIGH)
+            time.sleep(0.00009 * timingSecurityOffset)
+            GPIO.output(self.clkPin, GPIO.LOW)
+            time.sleep(0.0006 * timingSecurityOffset)
+
+        ## Deselect chip
+        GPIO.output(self.csPin, GPIO.HIGH)
+
+        return dataMSBFirst if dataMSBFirst == dataLSBFirst else None
+
+    def read_adc(self, channel):
+        return self._getValue(1, channel)
+
+    def read_adc_difference(self, lowChannel):
+        return self._getValue(0, lowChannel)
+
+    def cleanup(self):
+        GPIO.cleanup()
