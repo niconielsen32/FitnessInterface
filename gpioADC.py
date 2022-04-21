@@ -1,6 +1,16 @@
 import RPi.GPIO as GPIO
-import ADC0832
+
 import time
+
+import ADC0832 as ADC
+# Create an ADC0832 instance
+adc = ADC.ADC0832()
+
+# Specify which GPIO pins will be used
+adc.csPin = 24 # Default pin: 17
+adc.clkPin = 23 # Default pin: 27
+adc.doPin = 19 # Default pin: 23
+adc.diPin = 21 # Default pin: 24
 
  
 potentiometer_channel = 0
@@ -13,9 +23,9 @@ try:
     
     while True:
         
-        potentiometer_value = ADC0832.getResult(potentiometer_channel)
+        potentiometer_value = adc.read_adc(potentiometer_channel)
         
-        pressure_value = ADC0832.getResult(pressure_sensor_channel)
+        pressure_value = adc.read_adc(pressure_sensor_channel)
        
         
         print("Poten: ", potentiometer_value)
