@@ -1,5 +1,5 @@
 import RPi.GPIO as GPIO
-
+import ADC0832
 import time
 
 
@@ -66,6 +66,9 @@ def read_adc_value(cs_pin, clk_pin, miso_pin, mosi_pin):
     return round(adc_value)
 
  
+potentiometer_channel = 0
+pressure_sensor_channel = 1
+
 adc_value_list = []
 # Use try and keyboard exception for cleaning GPIO
 try:
@@ -74,6 +77,8 @@ try:
     init_GPIO()
     
     while True:
+        
+        potentiometer_value = ADC0832.getResult(potentiometer_channel)
         
         # Channel 0
         potentiometer_value = read_adc_value(PIN_CE0, PIN_CLK, PIN_MISO, PIN_MOSI)
