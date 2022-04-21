@@ -29,44 +29,44 @@ def init_GPIO():
 
    
 # Read SPI data from ADC
-def recvBits(numBits, clkPin, misoPin):
+def receive_bits(number_of_bits, clk_pin, miso_pin):
     #Receives arbitrary number of bits
-    retVal = 0
+    return_value = 0
     
-    for bit in range(numBits):
+    for bit in range(number_of_bits):
         # Pulse clock pin 
-        GPIO.output(clkPin, GPIO.HIGH)
-        GPIO.output(clkPin, GPIO.LOW)
+        GPIO.output(clk_pin, GPIO.HIGH)
+        GPIO.output(clk_pin, GPIO.LOW)
         
         # Read 1 data bit in
-        if GPIO.input(misoPin):
-            retVal |= 0x1
+        if GPIO.input(miso_pin):
+            return_value |= 0x1
         
         # Advance input to next bit
-        retVal <<= 1
+        return_value <<= 1
     
     # Divide by two to drop the NULL bit
-    return (retVal/2)
+    return (return_value/2)
 
 
-def readAdc(csPin, clkPin, misoPin, mosiPin):
+def read_adc_value(cs_pin, clk_pin, miso_pin, mosi_pin):
         
     # Datasheet says chip select must be pulled high between conversions
-    GPIO.output(csPin, GPIO.HIGH)
+    GPIO.output(cs_pin, GPIO.HIGH)
     
     # Start the read with both clock and chip select low
-    GPIO.output(csPin, GPIO.LOW)
-    GPIO.output(clkPin, GPIO.HIGH)
+    GPIO.output(cs_pin, GPIO.LOW)
+    GPIO.output(clk_pin, GPIO.HIGH)
     
-    adcValue = recvBits(10, clkPin, misoPin)
+    adc_value = receive_bits(number_of_bits=10, clk_pin, miso_pin)
     
     # Set chip select high to end the read
-    GPIO.output(csPin, GPIO.HIGH)
+    GPIO.output(cs_pin, GPIO.HIGH)
   
-    return round(adcValue)
+    return round(adc_value)
 
  
-adcValueList = []
+adc_value_list = []
 # Use try and keyboard exception for cleaning GPIO
 try:
     # Main program
@@ -76,10 +76,10 @@ try:
     while True:
         
         # Channel 0
-        potentiometer_value = readAdc(PIN_CE0, PIN_CLK, PIN_MISO, PIN_MOSI)
+        potentiometer_value = read_adc_value(PIN_CE0, PIN_CLK, PIN_MISO, PIN_MOSI)
         # Channel 1 - might need to just change the pins on raspberry to get the 2 channels instead.
         # GPIO 7 and 8 and then SPI setup pins - Outputs on 7 and 8
-        pressure_value = readAdc(PIN_CE1, PIN_CLK, PIN_MISO, PIN_MOSI)
+        pressure_value = read_adc_value(PIN_CE1, PIN_CLK, PIN_MISO, PIN_MOSI)
         
         print("Poten: ", potentiometer_value)
         print("Pressure: ", pressure_value)
