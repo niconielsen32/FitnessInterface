@@ -23,10 +23,11 @@ class ADC0832(object):
 
     def __init__(self):
         # Initialize pin numbers
-        self.csPin = 17
-        self.clkPin = 27
-        self.doPin = 23
-        self.diPin = 24
+        self.csPin = 8
+        self.clkPin = 11
+        self.doPin = 10
+        self.diPin = 9
+        
 
         # Setup GPIO
         GPIO.setmode(GPIO.BCM)
