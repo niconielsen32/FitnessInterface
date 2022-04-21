@@ -80,6 +80,8 @@ try:
         
         potentiometer_value = ADC0832.getResult(potentiometer_channel)
         
+        pressure_value = ADC0832.getResult(pressure_sensor_channel)
+        
         # Channel 0
         potentiometer_value = read_adc_value(PIN_CE0, PIN_CLK, PIN_MISO, PIN_MOSI)
         # Channel 1 - might need to just change the pins on raspberry to get the 2 channels instead.
