@@ -1,0 +1,19 @@
+TO DO
+
+
+Tegning af maskine
+- Teleskob arm laves. 
+- Tykkelse af håndtag ændres til ca 20mm (rør)
+- Design 3D print håndtag (indre diameter skal svare til tykkelse af håndtag)
+- Stang ændres til 50 mm 
+- Bundbeslag skal have sko på
+- Stang skal laves så popnitter bruges. 
+- Hvordan potentiometer skal monteres?
+- Pins skal designes med et lille håndtag og kun 10 mm til hårnål split
+- Beslag til stempel beam 
+
+
+Udrengninger:
+- Bending stress på håndtag
+- Bending stress på stang
+- Sheering stress af pins
