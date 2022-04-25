@@ -1,7 +1,9 @@
 TO DO
 
+Hvis en opgave er udført kan man bare skrive (udført) efter opgaven. Hvis der er andre opgaver der skal
+laves kan de skrives på listen. 
 
-Tegning af maskine
+Tegning af maskine:
 - Teleskob arm laves. 
 - Tykkelse af håndtag ændres til ca 20mm (rør)
 - Design 3D print håndtag (indre diameter skal svare til tykkelse af håndtag)
