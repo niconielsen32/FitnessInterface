@@ -240,3 +240,6 @@ disp(['The smallest allowable radius of the handle is: ', num2str(double(smalles
 % bolt is way higher than the worst case force being applied to any of the
 % brackets (750 N). Therefore, any bolt should suffice.
 % https://eurocodeapplied.com/design/en1993/bolt-design-properties
+
+% Should be good for pop rivetts as well. hear steength is 670 N, so mor
+% than one pop rivet is enough, since you can just sum then up
