@@ -1,31 +1,30 @@
+from cmath import sqrt
 import numpy as np
 
 class ForceCalc:
 
-	def __init__(self, length_to_handle=1, length_to_piston=0.5, update_time=0.5):
-		self.old_angle = 0
-
-		self.length_to_handle = length_to_handle
-		self.length_to_piston = length_to_piston
-		self.update_time = update_time
+	def __init__(self, length_to_handle=0.96, length_to_piston=0.45):
+		self.length_to_piston = 0.39
+		self.beam_to_piston = 0.695
 
 		self.piston_radius = 20*10**-3
+		self.old_piston_length = 0.481
 
-	def calc_power(self, angle, pressure):
+	def calc_power(self, angle, pressure, time):
+		piston_length = self.length_to_piston**2 + self.beam_to_piston**2 - 2*self.length_to_piston*self.beam_to_piston*np.cos(np.deg2rad(angle))
+		piston_length = np.sqrt(piston_length)
+		F_piston = pressure*(10**5) * self.piston_radius**2 * np.pi
 
-		F_piston = pressure*10**5 * self.piston_radius**2 * np.pi
-		print("F_piston: ", F_piston)
+		speed = (piston_length - self.old_piston_length) / time
 
-		force_handle = (self.length_to_piston * F_piston) / self.length_to_handle
-		print("Force handle: ", force_handle)
+		power = F_piston * speed
 
-		torque = self.length_to_handle * np.sin(angle) * force_handle
-		print("torque: ", torque)
-		rotational_speed = (angle - self.old_angle) / self.update_time
-		print("rotational: ", rotational_speed)
+		piston_change = piston_length - self.old_piston_length
+		self.old_piston_length = piston_length
 
-		power = torque * rotational_speed
+		return power, piston_change
 
-		self.old_angle = angle
 
-		return power
+	def get_f_piston(self, pressure):
+		F_piston = pressure*(10**5) * self.piston_radius**2 * np.pi
+		return F_piston
